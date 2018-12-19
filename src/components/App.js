@@ -1,22 +1,31 @@
 import React from 'react';
-import data from '../Data/trading-hours'
+import InstrumentsTable from "./InstrumentsTable";
 
 export default class App extends React.Component {
     constructor() {
         super();
         this.state = {
-            tradingHoursList: []
+            tradingHoursList: [],
+            openList: [],
+            onlyOpen: false,
+            currentTime: null
         };
     };
 
-    getTradingHoursList = () => {
+    getTime = () => {
         this.setState({
-            tradingHoursList: []
+            currentTime: +new Date
         });
+    };
 
-        // const link='./trading-hours.json';
+    onChange = () => {
+        this.setState(prevState => ({
+            onlyOpen: !prevState.onlyOpen
+        }))
+    };
 
-        fetch(data)
+    getTradingHoursList = () => {
+        fetch('trading-hours.json')
             .then(response => {
                 return response.json();
             })
@@ -28,16 +37,29 @@ export default class App extends React.Component {
             )
     };
 
-
     componentDidMount() {
-        this.getTradingHoursList()
+        this.getTradingHoursList();
+        setInterval(this.getTime, 1000);
     };
 
     render() {
-        console.log(data);
+        const {tradingHoursList, currentTime, onlyOpen, openList}=this.state;
+
         return (
             <div>
-                hello
+                <input
+                    type='checkbox'
+                    aria-label="Checkbox for following text input"
+                    onChange={this.onChange}
+                />
+                Open only
+                <div className='container'>
+                    {onlyOpen ? (
+                        <InstrumentsTable tradingHoursList={openList} currentTime={currentTime}/>
+                    ) : (
+                        <InstrumentsTable tradingHoursList={tradingHoursList} currentTime={currentTime}/>
+                    )}
+                </div>
             </div>
         )
     }
