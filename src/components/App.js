@@ -6,7 +6,6 @@ export default class App extends React.Component {
         super();
         this.state = {
             tradingHoursList: [],
-            openList: [],
             onlyOpen: false,
             currentTime: null
         };
@@ -37,30 +36,43 @@ export default class App extends React.Component {
             )
     };
 
+    getTradingHoursListByOpen = () =>
+        this.state.onlyOpen
+            ? this.state.tradingHoursList.filter(item =>
+                item.tradingHours.some(
+                    hour =>
+                        this.state.currentTime <= hour.to &&
+                        this.state.currentTime >= hour.from
+                )
+            )
+            : this.state.tradingHoursList;
+
     componentDidMount() {
         this.getTradingHoursList();
         setInterval(this.getTime, 1000);
     };
 
     render() {
-        const {tradingHoursList, currentTime, onlyOpen, openList}=this.state;
+        const { currentTime, onlyOpen } = this.state;
+        const tradingHoursListByOpen = this.getTradingHoursListByOpen();
 
         return (
             <div>
                 <input
-                    type='checkbox'
+                    id="only-open"
+                    checked={onlyOpen}
+                    type="checkbox"
                     aria-label="Checkbox for following text input"
                     onChange={this.onChange}
                 />
-                Open only
-                <div className='container'>
-                    {onlyOpen ? (
-                        <InstrumentsTable tradingHoursList={openList} currentTime={currentTime}/>
-                    ) : (
-                        <InstrumentsTable tradingHoursList={tradingHoursList} currentTime={currentTime}/>
-                    )}
+                <label htmlFor="only-open">Open only</label>
+                <div className="container">
+                    <InstrumentsTable
+                        tradingHoursList={tradingHoursListByOpen}
+                        currentTime={currentTime}
+                    />
                 </div>
             </div>
-        )
+        );
     }
 }
